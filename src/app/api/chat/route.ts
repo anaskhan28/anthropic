@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { AnthropicStream, StreamingTextResponse } from 'ai';
- 
+ import json from '@/utils/format.json'
 // Create an Anthropic API client (that's edge friendly)
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -11,14 +11,20 @@ export const runtime = 'edge';
  
 export async function POST(req: Request) {
   // Extract the `prompt` from the body of the request
-  const { messages } = await req.json();
+  const { messages, invoice } = await req.json();
+
+
+  console.log(messages, 'messages')
+  const data = invoice;
+  console.log(data, 'backend data')
+
  
   // Ask Claude for a streaming chat completion given the prompt
   const response = await anthropic.messages.create({
-    messages,
-    model: 'claude-3-haiku-20240307',
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: `${invoice}` }],
+    model: 'claude-3-opus-20240229',
     stream: true,
-    max_tokens: 300,
   });
  
   // Convert the response into a friendly text-stream

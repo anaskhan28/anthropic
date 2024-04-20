@@ -4,9 +4,11 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import {FilePond} from 'react-filepond'
 import 'filepond/dist/filepond.min.css';
+import axios from 'axios'
+import { json } from "stream/consumers"
 interface Message {
   id: string;
-  role: 'user' | 'ai';
+  role: 'user' | 'assistant';
   content: string;
 };
 
@@ -20,9 +22,53 @@ interface ChatProps {
 
 
 export function Chat({ messages, input, handleInputChange, handleSubmit }: ChatProps) {
-  const [files, SetFiles] = useState([])
+  const [file, setFile] = useState<File | null>(null);
+  const [response, setResponse] = useState<any | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [imageAPI, setImageAPI] = useState<boolean>(false);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
 
+  const dataHandleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      if (file) {
+        const isImage = ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type);
+        setImageAPI(isImage);
+        formData.append(`${isImage ? 'image' : 'document'}`, file);
+      }
+  
+      const res = await axios.post<any>(`http://192.168.1.105:5000/${imageAPI ? 'image' : 'extract'}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+  
+      setResponse(res.data);
+      const data = JSON.stringify(response);
+      console.log(data, 'data')
+      localStorage.setItem('invoice', data );
+      
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const textContent =
+  imageAPI &&
+  response &&
+  response.content &&
+  response.content.length > 0
+    ? response.content[0].text.match(/TextBlock\(text='(.*?)'/)?.[1] || ''
+    : 'no output';
 
   return (
     <div className="flex flex-col h-screen">
@@ -44,21 +90,23 @@ export function Chat({ messages, input, handleInputChange, handleSubmit }: ChatP
             <button className="max-w-36 bg-transparent hover:bg-none cursor-pointer">
             {/* {selectedFile && <img src={selectedFile ? selectedFile : "https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" } alt="preview" />}
             <Input placeholder="choose file" className="cursor-pointer" type="file" onClick={handleFileChange}/> */}
-               <FilePond
-        files={files}
-        onupdatefiles={SetFiles}
-        allowMultiple={true}
-        maxFiles={3}
-        server="http://192.168.1.105:5000/extract"
-        name="files" 
-        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
-      />
-            </button>
+            
+            
+  </button>
          
             
             <Button type="submit">Send</Button>
           </div>
         </form>
+
+        <form onSubmit={dataHandleSubmit}>
+        <input type="file" onChange={handleFileChange} />
+        <button type="submit" disabled={loading}>
+          {loading ? 'Uploading...' : 'Upload'}
+        </button>
+
+      </form>
+      {response && <pre>{imageAPI ? textContent : JSON.stringify(response, null, 2)}</pre>}
       </div>
     </div>
   );

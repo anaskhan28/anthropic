@@ -1,0 +1,55 @@
+{
+    "invoice_number": "INV-001",
+    "transaction_number": "INV-001",
+    "bill_number": "INV-001",
+    "date": "2024-04-19",
+    "due_date": "2024-05-03",
+    "currency": "USD",
+    "client": {
+      "name": "Client Company",
+      "address": "123 Client Street, Client City, Client Country",
+      "email": "client@example.com",
+      "phone": "+1234567890"
+    },
+    "items": [
+      {
+        "description": "Web Development Services",
+        "quantity": 1,
+        "unit_price": 1000,
+        "unit": "hour",
+        "total": 1000
+      },
+      {
+        "description": "Graphic Design Services",
+        "quantity": 2,
+        "unit_price": 500,
+        "unit": "project",
+        "total": 1000
+      }
+    ],
+    "subtotal": 2000,
+    "discount": 0,
+    "taxes": [
+      {
+        "name": "Sales Tax",
+        "rate": 0.1,
+        "amount": 200
+      }
+    ],
+    "total": 2200,
+    "payment_methods": [
+      {
+        "method": "Credit Card",
+        "details": "Visa ending in 1234"
+      },
+      {
+        "method": "Bank Transfer",
+        "details": "Account Number: 123456789"
+      }
+    ],
+    "additional_information": {
+      "project_details": "Project XYZ - Phase 1",
+      "terms": "Payment due within 30 days. Late payments subject to interest charges."
+    },
+    "is_paid": false
+  }
