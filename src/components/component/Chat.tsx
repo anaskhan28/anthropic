@@ -2,6 +2,8 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
+import {FilePond} from 'react-filepond'
+import 'filepond/dist/filepond.min.css';
 interface Message {
   id: string;
   role: 'user' | 'ai';
@@ -18,12 +20,9 @@ interface ChatProps {
 
 
 export function Chat({ messages, input, handleInputChange, handleSubmit }: ChatProps) {
-  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [files, SetFiles] = useState([])
 
-  const handleFileChange = (e:any) => {
-    setSelectedFile(URL.createObjectURL(e.target.files[0]));
-    console.log(selectedFile, 'file')
-  }
+
 
   return (
     <div className="flex flex-col h-screen">
@@ -43,9 +42,19 @@ export function Chat({ messages, input, handleInputChange, handleSubmit }: ChatP
           <div className="flex items-center">
             <Input className="flex-1 mr-2" placeholder="Type your message..." type="text" value={input} onChange={handleInputChange} />
             <button className="max-w-36 bg-transparent hover:bg-none cursor-pointer">
-            {selectedFile && <img src={selectedFile ? selectedFile : "https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" } alt="preview" />}
-            <Input placeholder="choose file" className="cursor-pointer" type="file" onChange={handleFileChange}/>
+            {/* {selectedFile && <img src={selectedFile ? selectedFile : "https://upload.wikimedia.org/wikipedia/commons/8/87/PDF_file_icon.svg" } alt="preview" />}
+            <Input placeholder="choose file" className="cursor-pointer" type="file" onClick={handleFileChange}/> */}
+               <FilePond
+        files={files}
+        onupdatefiles={SetFiles}
+        allowMultiple={true}
+        maxFiles={3}
+        server="http://192.168.1.105:5000/extract"
+        name="files" 
+        labelIdle='Drag & Drop your files or <span class="filepond--label-action">Browse</span>'
+      />
             </button>
+         
             
             <Button type="submit">Send</Button>
           </div>
